@@ -31,7 +31,7 @@ export function undoSwap(m:Model) {
   if(m.canUndo()) {
     var swap = m.puzzle.swaps.pop()!;
     m.puzzle.switchSyllables(swap.syllables[0].key, swap.syllables[1].key);
-    //does undo deselect?
+    m.puzzle.selectedSyllables.clear();
   }
 }
 
@@ -39,7 +39,6 @@ export function resetGame(m:Model) {
   while(m.canUndo()) {
     undoSwap(m)
   }
-  // deselect?
 }
 
 export function openConfiguration(m:Model, configuration:any) {
