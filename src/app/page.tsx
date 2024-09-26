@@ -4,7 +4,7 @@ import {Coordinate, Swap, Model} from '../model'
 import {configuration1,configuration2,configuration3} from '../puzzle'
 
 
-  // Controllers 
+// Controllers 
 export function selectSyllable(m:Model, row:number, col:number) {
   let coord = Coordinate.key(row,col);
   if(m.puzzle.selectedSyllables.has(coord)) {
@@ -31,6 +31,7 @@ export function undoSwap(m:Model) {
   if(m.canUndo()) {
     var swap = m.puzzle.swaps.pop()!;
     m.puzzle.switchSyllables(swap.syllables[0].key, swap.syllables[1].key);
+    //does undo deselect?
   }
 }
 
@@ -38,6 +39,7 @@ export function resetGame(m:Model) {
   while(m.canUndo()) {
     undoSwap(m)
   }
+  // deselect?
 }
 
 export function openConfiguration(m:Model, configuration:any) {
@@ -92,7 +94,10 @@ export default function Home() {
           </div>
         </div>
         <div className="game-content flex flex-col items-center">
-          <label className={`game-over ${model.victory ? 'visible' : 'invisible'}`}>You Win!</label>
+          <label className={`game-over`}
+          style={{
+            visibility: `${model.victory ? 'visible' : 'hidden'}`,
+          }}>You Win!</label>
           <div className="labels">
             <label className='game-info'>Swaps: {model.numSwaps}</label>
             <label className='game-info'>Score: {model.score}</label>

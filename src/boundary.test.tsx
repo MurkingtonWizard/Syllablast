@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { render, fireEvent, cleanup } from '@testing-library/react'
+import { render, fireEvent, cleanup, getByText } from '@testing-library/react'
 
 import Home from './app/page'
 
@@ -21,7 +21,7 @@ test('Home', async () => {
 })
 
 test('Access GUI', async() => {
-  const { getByTestId, getAllByTestId } = render(<Home />);
+  const { getByTestId, getAllByTestId, getByText } = render(<Home />);
   //expect(true).toBe(true)
   const config1 = getByTestId('config1') as HTMLButtonElement
   const config2 = getByTestId('config2') as HTMLButtonElement
@@ -92,7 +92,63 @@ test('Access GUI', async() => {
   fireEvent.click(config3)
   expect(config1.disabled).toBeFalsy()
   expect(config2.disabled).toBeFalsy()
-  expect(config3.disabled).toBeTruthy()  
+  expect(config3.disabled).toBeTruthy()
+
+  fireEvent.click(config1)
+  expect(config1.disabled).toBeTruthy()
+  expect(config2.disabled).toBeFalsy()
+  expect(config3.disabled).toBeFalsy()
+
+  cleanup()
+});
+
+
+test('Full configuration', async() => {
+    const { getByTestId, getByText } = render(<Home />);
+    const config1 = getByTestId('config1') as HTMLButtonElement
+    const swap = getByTestId('swap') as HTMLButtonElement
+    const reset = getByTestId('reset') as HTMLButtonElement
+    const undo = getByTestId('undo') as HTMLButtonElement
+
+  // full solution for config 1
+  fireEvent.click(config1)
+  const scoreElement = getByText(/Score: \d+/);
+  const victoryElement = getByText(/You Win!/);
+  expect(scoreElement === undefined).toBe(false);
+  expect(victoryElement === undefined).toBe(false);
+  expect(victoryElement.style.visibility).toStrictEqual('hidden')
+
+  const swapPair = (row1:number,col1:number,row2:number,col2:number) => {
+    fireEvent.click(getByTestId(`button-${row1},${col1}`) as HTMLButtonElement);
+    fireEvent.click(getByTestId(`button-${row2},${col2}`) as HTMLButtonElement);
+    fireEvent.click(swap);
+  }
+
+  swapPair(1,1,3,0)
+  swapPair(2,0,3,2)
+  swapPair(0,2,3,3)
+  expect(scoreElement.textContent).toStrictEqual("Score: 5");
+
+  swapPair(1,0,2,1)
+  swapPair(1,3,2,2)
+  swapPair(0,1,2,3)
+  expect(scoreElement.textContent).toStrictEqual("Score: 8");
+
+  swapPair(0,0,0,3)
+  swapPair(0,0,0,1)
+  expect(scoreElement.textContent).toStrictEqual("Score: 12");
+
+  swapPair(1,0,1,2)
+  expect(scoreElement.textContent).toStrictEqual("Score: 13");
+  
+  swapPair(1,1,1,3)
+  swapPair(1,2,1,3)
+  expect(scoreElement.textContent).toStrictEqual("Score: 16");
+  
+  expect(victoryElement.style.visibility).toBeTruthy()
+  expect(swap.disabled).toBeTruthy()
+  expect(undo.disabled).toBeTruthy()
+  expect(reset.disabled).toBeFalsy()
 
   cleanup()
 });

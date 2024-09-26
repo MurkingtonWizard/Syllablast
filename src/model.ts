@@ -62,27 +62,12 @@ export class Puzzle {
 
     calculateScore() {
         var score:number = 0;
-        //var rowsChecked = new Set<number>();
 
-        for (let gameRow = 0; gameRow < this.numWords; gameRow++) {
-            //let bestMatchRow: number = -1;
-            //let bestMatchScore = 0;
-    
+        for (let gameRow = 0; gameRow < this.numWords; gameRow++) {    
             for (let solnRow = 0; solnRow < this.numWords; solnRow++) {
-                //if (!rowsChecked.has(j)) {
-                    let consecutiveScore = this.getConsecutiveMatchCount(gameRow, solnRow);
-                    score += consecutiveScore;
-                    // if (consecutiveScore > bestMatchScore) {
-                    //     bestMatchScore = consecutiveScore;
-                    //     bestMatchRow = j;
-                    // }
-                //}
+                let consecutiveScore = this.getConsecutiveMatchCount(gameRow, solnRow);
+                score += consecutiveScore;
             }
-    
-            // if (bestMatchRow != -1) {
-            //     score += bestMatchScore;
-            //     //rowsChecked.add(bestMatchRow);
-            // }
         }
 
         return score;
