@@ -10,6 +10,10 @@ export class Coordinate {
     static key(row:number, column:number):String {
         return `${row},${column}`;
     }
+    static coordinate(coordString: String): Coordinate {
+        const [row, col] = coordString.split(",").map(Number);
+        return new Coordinate(row, col);
+    }
 
     get key() :String {
         return Coordinate.key(this.row,this.column);
@@ -29,7 +33,7 @@ export class Puzzle {
     private readonly words : Map<String,String>; // *
     readonly numWords : number;
     readonly numSyllablesInWord : number;
-    private _selectedSyllables : Coordinate[]; // 0..2
+    private _selectedSyllables : Set<String>; // 0..2
     private _swaps : Swap[]; // 0..*
 
     constructor(syllables:Map<String,String>,words:Map<String,String>, numWords:number, numSyllables:number) {
@@ -37,7 +41,7 @@ export class Puzzle {
         this.words = words;
         this.numWords = numWords;
         this.numSyllablesInWord = numSyllables;
-        this._selectedSyllables = [];
+        this._selectedSyllables = new Set<String>();
         this._swaps = [];
     }
 
@@ -58,30 +62,38 @@ export class Puzzle {
 
     calculateScore() {
         var score:number = 0;
-        var rowsChecked = new Set<number>();
+        //var rowsChecked = new Set<number>();
 
-        for (let i = 0; i < this.numWords; i++) {
-            let bestMatchRow: number = -1;
-            let bestMatchScore = 0;
+        for (let gameRow = 0; gameRow < this.numWords; gameRow++) {
+            //let bestMatchRow: number = -1;
+            //let bestMatchScore = 0;
     
-            for (let j = 0; j < this.numWords; j++) {
-                if (!rowsChecked.has(j)) {
-                    let consecutiveScore = this.getConsecutiveMatchCount(i, j);
-    
-                    if (consecutiveScore > bestMatchScore) {
-                        bestMatchScore = consecutiveScore;
-                        bestMatchRow = j;
-                    }
-                }
+            for (let solnRow = 0; solnRow < this.numWords; solnRow++) {
+                //if (!rowsChecked.has(j)) {
+                    let consecutiveScore = this.getConsecutiveMatchCount(gameRow, solnRow);
+                    score += consecutiveScore;
+                    // if (consecutiveScore > bestMatchScore) {
+                    //     bestMatchScore = consecutiveScore;
+                    //     bestMatchRow = j;
+                    // }
+                //}
             }
     
-            if (bestMatchRow != -1) {
-                score += bestMatchScore;
-                rowsChecked.add(bestMatchRow);
-            }
+            // if (bestMatchRow != -1) {
+            //     score += bestMatchScore;
+            //     //rowsChecked.add(bestMatchRow);
+            // }
         }
 
         return score;
+    }
+
+    switchSyllables(coord1:String, coord2:String) {
+        var syl1 = this.syllables.get(coord1)
+        var syl2 = this.syllables.get(coord2)
+
+        this.syllables.set(coord1, syl2!)
+        this.syllables.set(coord2, syl1!)
     }
 
     get syllables() : Map<String,String> {
@@ -91,20 +103,23 @@ export class Puzzle {
     get swaps() : Swap[] {
         return this._swaps;
     }
-    get selectedSyllables() : Coordinate[] {
+    get selectedSyllables() : Set<String> {
         return this._selectedSyllables;
     }
 }
 
 export class Model {
     puzzle!: Puzzle;
+    configuration: string
 
     // info is going to be JSON-encoded puzzle
     constructor(info: any) {
+        this.configuration = ""
         this.initialize(info);
     }
 
-    initialize(info: { board: String[][], solution : String[][]}) {
+    initialize(info: { name:string,board: String[][], solution : String[][]}) {
+        this.configuration = info.name;
         let syllables = new Map<String, String>();
         let words = new Map<String, String>();
         for( var rowIndex in info.board) {
@@ -126,5 +141,13 @@ export class Model {
 
     get victory():boolean {
         return this.score == this.puzzle.syllables.size;
+    }
+
+    canSwap():boolean {
+        return this.puzzle.selectedSyllables.size === 2
+    }
+
+    canUndo() :boolean {
+        return this.puzzle.swaps.length > 0;
     }
 }

@@ -9,6 +9,8 @@ test('Coordinate', () => {
     expect(c1.row).toBe(2)
     expect(c1.column).toBe(3)
     expect(c1).toStrictEqual(new Coordinate(2,3))
+    expect(Coordinate.key(0,0)).toBe("0,0");
+    expect(Coordinate.coordinate("1,2")).toStrictEqual(new Coordinate(1,2));
 })
 
 test('Swap', () => {
@@ -35,7 +37,7 @@ test('Puzzle', () => {
     expect(words.get(Coordinate.key(0,0))).toBe("test")
     let pz = new Puzzle(syllables,words,2,2)
     expect(pz.syllables).toStrictEqual(syllables)
-    expect(pz.selectedSyllables).toStrictEqual([])
+    expect(pz.selectedSyllables).toStrictEqual(new Set<String>())
     expect(pz.swaps).toStrictEqual([])
     expect(pz.numSyllablesInWord).toBe(2)
     expect(pz.numSyllablesInWord).toBe(2)
@@ -50,4 +52,18 @@ test('Model', () => {
     expect(m.score).toBe(0);
     expect(m.victory).toBe(false)
     expect(m.puzzle.numWords).toBe(4);
+
+    expect(m.canSwap()).toBe(false);
+    m.puzzle.selectedSyllables.add(Coordinate.key(0,1));
+    expect(m.canSwap()).toBe(false);
+    m.puzzle.selectedSyllables.add(Coordinate.key(0,0));
+    expect(m.canSwap()).toBe(true);
+    
+    m.puzzle.switchSyllables(Coordinate.key(0,0),Coordinate.key(0,1));
+    expect(m.puzzle.syllables.get("0,0")).toBe("ate")
+    expect(m.puzzle.syllables.get("0,1")).toBe("ter")
+
+    expect(m.canUndo()).toBe(false)
+    m.puzzle.swaps.push(new Swap(new Coordinate(0,0),new Coordinate(0,1)))
+    expect(m.canUndo()).toBe(true)
 })
