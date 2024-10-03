@@ -1,7 +1,7 @@
 {
   "name": "syllablast",
   "version": "0.1.0",
-  "homepage": "https://https://murkingtonwizard.github.io/Syllablast",
+  "homepage": "https://murkingtonwizard.github.io/Syllablast",
   "private": true,
   "scripts": {
     "dev": "next dev",
